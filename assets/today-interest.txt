@@ -1,12 +1,1 @@
-Video
-Generation,3D
-Generation,Gaussian
-Splatting,3D
-Reconstruction,World
-Model,Geometric,Interactive
-Video
-Generation,4D
-Dynamic
-Reconstruction,Physical
-Animation,Fluid
-Simulation,MPM,Graphics
+Video Generation,Image Generation,Audio-Visual Generation,Interactive Video Generation
