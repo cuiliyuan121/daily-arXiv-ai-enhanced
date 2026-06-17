@@ -183,9 +183,15 @@
         const rememberMe = document.getElementById('rememberMe');
         const errorMessage = document.getElementById('errorMessage');
 
+        const redirect = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
+
+        // If password protection is disabled, redirect directly to target page
+        if (!Auth.isPasswordEnabled()) {
+            window.location.href = redirect;
+        }
+
         // If already authenticated, redirect to target page
         if (Auth.isAuthenticated()) {
-            const redirect = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
             window.location.href = redirect;
         }
 
@@ -196,7 +202,6 @@
 
             if (await Auth.login(password, remember)) {
                 // Login successful, redirect
-                const redirect = new URLSearchParams(window.location.search).get('redirect') || 'index.html';
                 window.location.href = redirect;
             } else {
                 // Login failed
