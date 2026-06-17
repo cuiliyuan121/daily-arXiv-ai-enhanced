@@ -13,6 +13,8 @@ ai/.env
 # Local environment variables
 .env
 .env.local
+*.swp
+.*.swp
 
 test/*
 .idea/
