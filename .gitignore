@@ -9,6 +9,11 @@ wheels/
 # Virtual environments
 .venv
 ai/.env
+
+# Local environment variables
+.env
+.env.local
+
 test/*
 .idea/
 .cursorrules

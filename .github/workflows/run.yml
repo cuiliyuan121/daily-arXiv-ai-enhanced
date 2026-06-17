@@ -256,7 +256,7 @@ jobs:
           FEISHU_BOT_SECRET: ${{ secrets.FEISHU_BOT_SECRET }}
           CRAWL_DATE: ${{ steps.precheck.outputs.today }}
           INTEREST_KEYWORDS: ${{ vars.INTEREST }}
-          SITE_URL: https://yzszy.github.io/daily-arXiv-ai-enhanced/
+          SITE_URL: https://cuiliyuan121.github.io/daily-arXiv-ai-enhanced/
         run: |
           if [ -z "$FEISHU_WEBHOOK_URL" ]; then
             echo "ℹ️ FEISHU_WEBHOOK_URL is not set, skip Feishu notification"
