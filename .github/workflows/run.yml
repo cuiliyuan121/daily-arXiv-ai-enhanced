@@ -180,7 +180,7 @@ jobs:
           fi
 
           if [ -f "js/auth-config.js" ]; then
-            sed -i "s/PLACEHOLDER_PASSWORD_HASH/$PASSWORD_HASH/" js/auth-config.js
+            sed -i "s/passwordHash: '.*'/passwordHash: '$PASSWORD_HASH'/" js/auth-config.js
             echo "✅ Password hash injected into js/auth-config.js"
           else
             echo "❌ ERROR: js/auth-config.js not found!"
