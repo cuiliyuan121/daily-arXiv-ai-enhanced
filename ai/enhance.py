@@ -262,8 +262,8 @@ def process_all_items(data: List[Dict], model_name: str, language: str, max_work
 def main():
     # python enhance.py --data ../data/${today}.jsonl
     args = parse_args()
-    model_name = 'deepseek-chat' # os.environ.get("MODEL_NAME", 'deepseek-chat')
-    language = 'Chinese' # os.environ.get("LANGUAGE", 'Chinese')
+    model_name = os.environ.get("MODEL_NAME", "gpt-4o-mini")
+    language = os.environ.get("LANGUAGE", "Chinese")
     interests = parse_interests(os.environ.get("INTEREST", ""))
 
     # 检查并删除目标文件

@@ -5,6 +5,9 @@ on:
     - cron: "45 0 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,6 +20,7 @@ jobs:
         env:
           LANGUAGE: ${{ vars.LANGUAGE }}
         run: |
+          LANGUAGE="${LANGUAGE:-Chinese}"
           today=$(date -u "+%Y-%m-%d")
           ai_file="data/${today}_AI_enhanced_${LANGUAGE}.jsonl"
 
@@ -51,6 +55,11 @@ jobs:
           MODEL_NAME: ${{ vars.MODEL_NAME }}
         run: |
           source .venv/bin/activate
+          export LANGUAGE="${LANGUAGE:-Chinese}"
+          export CATEGORIES="${CATEGORIES:-cs.CV,cs.CL}"
+          export INTEREST="${INTEREST:-}"
+          export MODEL_NAME="${MODEL_NAME:-gpt-4o-mini}"
+          echo "有效配置：LANGUAGE=$LANGUAGE, CATEGORIES=$CATEGORIES, MODEL_NAME=$MODEL_NAME"
           today="${{ steps.precheck.outputs.today }}"
           echo "开始爬取 $today 的 arXiv 论文..."
 
@@ -119,6 +128,10 @@ jobs:
           MODEL_NAME: ${{ vars.MODEL_NAME }}
         run: |
           source .venv/bin/activate
+          export LANGUAGE="${LANGUAGE:-Chinese}"
+          export INTEREST="${INTEREST:-}"
+          export MODEL_NAME="${MODEL_NAME:-gpt-4o-mini}"
+          echo "有效配置：LANGUAGE=$LANGUAGE, MODEL_NAME=$MODEL_NAME, INTEREST=${INTEREST:-<empty>}"
           today="${{ steps.precheck.outputs.today }}"
           echo "开始 AI 增强处理..."
 
@@ -133,6 +146,7 @@ jobs:
           LANGUAGE: ${{ vars.LANGUAGE }}
         run: |
           source .venv/bin/activate
+          LANGUAGE="${LANGUAGE:-Chinese}"
           today="${{ steps.precheck.outputs.today }}"
           echo "转换为 Markdown 格式..."
 
@@ -159,9 +173,11 @@ jobs:
 
       - name: Update today interest
         if: steps.precheck.outputs.skip_today != 'true' && steps.dedup_check.outputs.has_new_content == 'true'
+        env:
+          INTEREST: ${{ vars.INTEREST }}
         run: |
           echo "更新今日 INTEREST..."
-          printf '%s\n' "${{ vars.INTEREST }}" > assets/today-interest.txt
+          printf '%s\n' "${INTEREST:-Video Generation,Image Generation,Audio-Visual Generation,Interactive Video Generation}" > assets/today-interest.txt
           echo "今日 INTEREST 更新完成"
 
       - name: Generate password hash and inject into config
@@ -215,9 +231,12 @@ jobs:
 
       - name: Commit changes
         if: steps.precheck.outputs.skip_today != 'true' && steps.dedup_check.outputs.has_new_content == 'true'
+        env:
+          GIT_EMAIL: ${{ vars.EMAIL }}
+          GIT_NAME: ${{ vars.NAME }}
         run: |
-          git config --global user.email "${{ vars.EMAIL }}"
-          git config --global user.name "${{ vars.NAME }}"
+          git config --global user.email "${GIT_EMAIL:-lycui121@gmail.com}"
+          git config --global user.name "${GIT_NAME:-cuiliyuan121}"
           git add .
 
           if git diff --staged --quiet; then
