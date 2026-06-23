@@ -1,6 +1,7 @@
 import os
 import json
 import sys
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict
 import requests
@@ -64,13 +65,34 @@ def parse_interests(raw_interest: str) -> List[str]:
     return [part.strip() for part in normalized.split(";") if part.strip()]
 
 
+def normalize_for_keyword_match(text: str) -> str:
+    """Normalize text so hyphenated and spaced phrases can be matched consistently."""
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
+def get_direct_interest_matches(item: Dict, interests: List[str]) -> List[str]:
+    """Return interests that appear directly in title, abstract, or comment."""
+    raw_text = " ".join(
+        str(item.get(key) or "") for key in ["title", "summary", "comment"]
+    ).lower()
+    normalized_text = normalize_for_keyword_match(raw_text)
+
+    matches = []
+    for interest in interests:
+        interest_lower = interest.lower()
+        normalized_interest = normalize_for_keyword_match(interest)
+        if interest_lower in raw_text or normalized_interest in normalized_text:
+            matches.append(interest)
+    return matches
+
+
 def filter_items_by_interest(
     data: List[Dict],
     model_name: str,
     language: str,
     interests: List[str],
 ) -> List[Dict]:
-    """Use the model to keep only papers relevant to the configured interests."""
+    """Keep direct keyword matches first, then use the model for semantic matches."""
     if not interests:
         print("INTEREST is empty, skipping interest-based filtering", file=sys.stderr)
         return data
@@ -105,7 +127,18 @@ def filter_items_by_interest(
     chain = interest_prompt | llm
 
     filtered_data = []
+    direct_match_count = 0
     for item in tqdm(data, desc="Filtering by interest"):
+        direct_matches = get_direct_interest_matches(item, interests)
+        if direct_matches:
+            item["interest_filter"] = {
+                "matched_interests": direct_matches,
+                "reason": f"Direct keyword match: {', '.join(direct_matches)}",
+            }
+            filtered_data.append(item)
+            direct_match_count += 1
+            continue
+
         try:
             decision: InterestDecision = chain.invoke({
                 "language": language,
@@ -130,7 +163,8 @@ def filter_items_by_interest(
             filtered_data.append(item)
 
     print(
-        f"Interest-based filtering kept {len(filtered_data)} / {len(data)} papers",
+        f"Interest-based filtering kept {len(filtered_data)} / {len(data)} papers "
+        f"({direct_match_count} direct keyword matches)",
         file=sys.stderr,
     )
     return filtered_data

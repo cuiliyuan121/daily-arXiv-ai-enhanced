@@ -27,13 +27,17 @@ jobs:
           echo "today=$today" >> "$GITHUB_OUTPUT"
           echo "ai_file=$ai_file" >> "$GITHUB_OUTPUT"
 
-          if [ -f "$ai_file" ]; then
+          if [ -s "$ai_file" ]; then
             echo "skip_today=true" >> "$GITHUB_OUTPUT"
-            echo "✅ Found today's AI enhanced file: $ai_file"
+            echo "✅ Found non-empty today's AI enhanced file: $ai_file"
             echo "⏭️ Skip all subsequent processing."
           else
             echo "skip_today=false" >> "$GITHUB_OUTPUT"
-            echo "📝 Today's AI enhanced file not found: $ai_file"
+            if [ -f "$ai_file" ]; then
+              echo "⚠️ Today's AI enhanced file exists but is empty: $ai_file"
+            else
+              echo "📝 Today's AI enhanced file not found: $ai_file"
+            fi
             echo "▶️ Continue workflow."
           fi
 
