@@ -1622,7 +1622,7 @@ function renderPapers() {
         <p class="paper-card-summary">${highlightedSummary}</p>
         <div class="paper-card-footer">
           <span class="paper-card-date">${formatDate(paper.date)}</span>
-          <span class="paper-card-link">Details</span>
+          <span class="paper-card-link">查看详情</span>
         </div>
       </div>
     `;
@@ -1709,22 +1709,22 @@ function showPaperDetails(paper, paperIndex) {
   
   const modalContent = `
     <div class="paper-details ${matchedPaperClass}">
-      <p><strong>Authors: </strong>${highlightedAuthors}</p>
-      <p><strong>Categories: </strong>${categoryDisplay}</p>
-      <p><strong>Date: </strong>${formatDate(paper.date)}</p>
+      <p><strong>作者：</strong>${highlightedAuthors}</p>
+      <p><strong>分类：</strong>${categoryDisplay}</p>
+      <p><strong>日期：</strong>${formatDate(paper.date)}</p>
       
       
-      <h3>TL;DR</h3>
+      <h3>一句话总结</h3>
       <p>${highlightedSummary}</p>
       
       <div class="paper-sections">
-        ${paper.motivation ? `<div class="paper-section"><h4>Motivation</h4><p>${highlightedMotivation}</p></div>` : ''}
-        ${paper.method ? `<div class="paper-section"><h4>Method</h4><p>${highlightedMethod}</p></div>` : ''}
-        ${paper.result ? `<div class="paper-section"><h4>Result</h4><p>${highlightedResult}</p></div>` : ''}
-        ${paper.conclusion ? `<div class="paper-section"><h4>Conclusion</h4><p>${highlightedConclusion}</p></div>` : ''}
+        ${paper.motivation ? `<div class="paper-section"><h4>研究动机</h4><p>${highlightedMotivation}</p></div>` : ''}
+        ${paper.method ? `<div class="paper-section"><h4>方法</h4><p>${highlightedMethod}</p></div>` : ''}
+        ${paper.result ? `<div class="paper-section"><h4>结果</h4><p>${highlightedResult}</p></div>` : ''}
+        ${paper.conclusion ? `<div class="paper-section"><h4>结论</h4><p>${highlightedConclusion}</p></div>` : ''}
       </div>
       
-      ${highlightedAbstract ? `<h3>Abstract</h3><p class="original-abstract">${highlightedAbstract}</p>` : ''}
+      ${highlightedAbstract ? `<h3>原始摘要</h3><p class="original-abstract">${highlightedAbstract}</p>` : ''}
 
       <div class="related-papers-section">
         <div class="related-papers-header">

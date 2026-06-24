@@ -1,21 +1,21 @@
 ### [{idx}] [{title}]({url})
 *{authors}*
 
-Main category: {cate}
+主分类：{cate}
 
-TL;DR: {tldr}
+一句话总结：{tldr}
 
 
 <details>
-  <summary>Details</summary>
-Motivation: {motivation}
+  <summary>详细信息</summary>
+研究动机：{motivation}
 
-Method: {method}
+方法：{method}
 
-Result: {result}
+结果：{result}
 
-Conclusion: {conclusion}
+结论：{conclusion}
 
-Abstract: {summary}
+原始摘要：{summary}
 
 </details>

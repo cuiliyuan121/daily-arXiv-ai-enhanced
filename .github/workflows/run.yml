@@ -62,8 +62,9 @@ jobs:
           export LANGUAGE="${LANGUAGE:-Chinese}"
           export CATEGORIES="${CATEGORIES:-cs.CV,cs.CL}"
           export INTEREST="${INTEREST:-}"
-          export MODEL_NAME="${MODEL_NAME:-gpt-4o-mini}"
-          echo "有效配置：LANGUAGE=$LANGUAGE, CATEGORIES=$CATEGORIES, MODEL_NAME=$MODEL_NAME"
+          export MODEL_NAME="${MODEL_NAME:-deepseek-chat}"
+          export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://api.deepseek.com}"
+          echo "有效配置：LANGUAGE=$LANGUAGE, CATEGORIES=$CATEGORIES, MODEL_NAME=$MODEL_NAME, OPENAI_BASE_URL=$OPENAI_BASE_URL"
           today="${{ steps.precheck.outputs.today }}"
           echo "开始爬取 $today 的 arXiv 论文..."
 
@@ -134,8 +135,9 @@ jobs:
           source .venv/bin/activate
           export LANGUAGE="${LANGUAGE:-Chinese}"
           export INTEREST="${INTEREST:-}"
-          export MODEL_NAME="${MODEL_NAME:-gpt-4o-mini}"
-          echo "有效配置：LANGUAGE=$LANGUAGE, MODEL_NAME=$MODEL_NAME, INTEREST=${INTEREST:-<empty>}"
+          export MODEL_NAME="${MODEL_NAME:-deepseek-chat}"
+          export OPENAI_BASE_URL="${OPENAI_BASE_URL:-https://api.deepseek.com}"
+          echo "有效配置：LANGUAGE=$LANGUAGE, MODEL_NAME=$MODEL_NAME, OPENAI_BASE_URL=$OPENAI_BASE_URL, INTEREST=${INTEREST:-<empty>}"
           today="${{ steps.precheck.outputs.today }}"
           echo "开始 AI 增强处理..."
 

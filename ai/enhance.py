@@ -169,6 +169,25 @@ def filter_items_by_interest(
     )
     return filtered_data
 
+def get_default_ai_fields(language: str) -> Dict[str, str]:
+    """Return localized fallback fields for failed AI generation."""
+    if language and ("chinese" in language.lower() or "中文" in language):
+        return {
+            "tldr": "摘要生成失败",
+            "motivation": "研究动机分析不可用",
+            "method": "方法提取失败",
+            "result": "结果分析不可用",
+            "conclusion": "结论提取失败",
+        }
+    return {
+        "tldr": "Summary generation failed",
+        "motivation": "Motivation analysis unavailable",
+        "method": "Method extraction failed",
+        "result": "Result analysis unavailable",
+        "conclusion": "Conclusion extraction failed",
+    }
+
+
 def process_single_item(chain, item: Dict, language: str) -> Dict:
     def is_sensitive(content: str) -> bool:
         """
@@ -199,13 +218,7 @@ def process_single_item(chain, item: Dict, language: str) -> Dict:
 
     """处理单个数据项"""
     # Default structure with meaningful fallback values
-    default_ai_fields = {
-        "tldr": "Summary generation failed",
-        "motivation": "Motivation analysis unavailable",
-        "method": "Method extraction failed",
-        "result": "Result analysis unavailable",
-        "conclusion": "Conclusion extraction failed"
-    }
+    default_ai_fields = get_default_ai_fields(language)
     
     try:
         response: Structure = chain.invoke({
@@ -213,6 +226,7 @@ def process_single_item(chain, item: Dict, language: str) -> Dict:
             "content": item['summary']
         })
         item['AI'] = response.model_dump()
+        item['_ai_generation_failed'] = False
     except langchain_core.exceptions.OutputParserException as e:
         # 尝试从错误信息中提取 JSON 字符串并修复
         error_msg = str(e)
@@ -231,11 +245,13 @@ def process_single_item(chain, item: Dict, language: str) -> Dict:
         
         # Merge partial data with defaults to ensure all fields exist
         item['AI'] = {**default_ai_fields, **partial_data}
+        item['_ai_generation_failed'] = not bool(partial_data)
         print(f"Using partial AI data for {item.get('id', 'unknown')}: {list(partial_data.keys())}", file=sys.stderr)
     except Exception as e:
         # Catch any other exceptions and provide default values
         print(f"Unexpected error for {item.get('id', 'unknown')}: {e}", file=sys.stderr)
         item['AI'] = default_ai_fields
+        item['_ai_generation_failed'] = True
     
     # Final validation to ensure all required fields exist
     for field in default_ai_fields.keys():
@@ -283,20 +299,15 @@ def process_all_items(data: List[Dict], model_name: str, language: str, max_work
                 print(f"Item at index {idx} generated an exception: {e}", file=sys.stderr)
                 # Add default AI fields to ensure consistency
                 processed_data[idx] = data[idx]
-                processed_data[idx]['AI'] = {
-                    "tldr": "Processing failed",
-                    "motivation": "Processing failed",
-                    "method": "Processing failed",
-                    "result": "Processing failed",
-                    "conclusion": "Processing failed"
-                }
+                processed_data[idx]['AI'] = get_default_ai_fields(language)
+                processed_data[idx]['_ai_generation_failed'] = True
     
     return processed_data
 
 def main():
     # python enhance.py --data ../data/${today}.jsonl
     args = parse_args()
-    model_name = os.environ.get("MODEL_NAME", "gpt-4o-mini")
+    model_name = os.environ.get("MODEL_NAME", "deepseek-chat")
     language = os.environ.get("LANGUAGE", "Chinese")
     interests = parse_interests(os.environ.get("INTEREST", ""))
 
@@ -342,11 +353,21 @@ def main():
         args.max_workers
     )
     
+    valid_processed_data = [item for item in processed_data if item is not None]
+    failed_count = sum(1 for item in valid_processed_data if item.get('_ai_generation_failed'))
+    if valid_processed_data and failed_count == len(valid_processed_data):
+        print(
+            "All AI generation attempts failed. Please check OPENAI_API_KEY, "
+            "OPENAI_BASE_URL, MODEL_NAME, and provider quota.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     # 保存结果
     with open(target_file, "w") as f:
-        for item in processed_data:
-            if item is not None:
-                f.write(json.dumps(item) + "\n")
+        for item in valid_processed_data:
+            item.pop('_ai_generation_failed', None)
+            f.write(json.dumps(item, ensure_ascii=False) + "\n")
 
 if __name__ == "__main__":
     main()
