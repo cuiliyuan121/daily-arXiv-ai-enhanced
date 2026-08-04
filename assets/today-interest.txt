@@ -1,1 +1,1 @@
-Video Generation Foundation Model,Image Generation Foundation Model,Audio-Visual Generation,Interactive Video Generation, Autoregressive Diffusion, Real-time Video Generation
+Video Generation Foundation Model,Image Generation Foundation Model,Audio-Visual Generation,Interactive Video Generation, Autoregressive Diffusion, Real-time Video Generation, Infinite
